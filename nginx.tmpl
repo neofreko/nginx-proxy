@@ -65,23 +65,22 @@ server {
   }
 
   {{ range $index, $value := $containers }}
-  {{ if ne $value.Env.SSL_PORT "" }}
+    {{ if (and ($value.Env.SSL_PORT) (and (eq $index 0) (and (exists "/var/reverse-proxy-ssl/reverse-proxy.crt") (exists "/var/reverse-proxy-ssl/reverse-proxy.key")))) }}
+      # SSL stuff
+      ssl on;
+      listen               {{ $value.Env.SSL_PORT }} ssl;
+      ssl_certificate      /var/reverse-proxy-ssl/reverse-proxy.crt;
+      ssl_certificate_key  /var/reverse-proxy-ssl/reverse-proxy.key;
 
-  # SSL stuff
-  ssl on;
-  listen               {{ $value.Env.SSL_PORT }} ssl;
-  ssl_certificate      /var/reverse-proxy-ssl/reverse-proxy.crt;
-  ssl_certificate_key  /var/reverse-proxy-ssl/reverse-proxy.key;
+      ### Add SSL specific settings here ###
 
-  ### Add SSL specific settings here ###
-
-  ssl_protocols        SSLv3 TLSv1 TLSv1.1 TLSv1.2;
-  ssl_ciphers RC4:HIGH:!aNULL:!MD5;
-  ssl_prefer_server_ciphers on;
-  keepalive_timeout    60;
-  ssl_session_cache    shared:SSL:10m;
-  ssl_session_timeout  10m;
-  {{ end }}
+      ssl_protocols        SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+      ssl_ciphers RC4:HIGH:!aNULL:!MD5;
+      ssl_prefer_server_ciphers on;
+      keepalive_timeout    60;
+      ssl_session_cache    shared:SSL:10m;
+      ssl_session_timeout  10m;
+    {{ end }}
   {{ end }}
 }
 {{ end }}
