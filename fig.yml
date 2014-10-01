@@ -1,0 +1,27 @@
+reverseproxy:
+  #image: jwilder/nginx-proxy
+  #build: github.com/neofreko/nginx-proxy
+  image: rproxy
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock
+    - /htdocs/staging-fig:/var/reverse-proxy-ssl
+    - /htdocs/staging-fig/nginx-proxy:/app
+  ports:
+    - "8080:80"
+    - "8443:443"
+goserver:
+  image: adejonge/helloworld
+  ports:
+    - 8080
+  environment:
+    VIRTUAL_HOST: goserver.monoco.dev
+    APPLICATION_ENV: development
+app:
+  image: dockerfile/nginx
+  ports:
+    - 80
+    - 443
+  environment:
+    VIRTUAL_HOST: app.monoco.dev
+    APPLICATION_ENV: development
+    SSL_PORT: 443
